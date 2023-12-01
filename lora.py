@@ -216,7 +216,8 @@ class S3Bucket_Load_LoRA:
             return model, clip
         lora_path = folder_paths.get_full_path("loras", lora_name)
         lora = None
-        if not os.path.exists(lora_path):
+        if not lora_path:
+            os.makedirs(lora_path, exist_ok=True)
             download_file(bucket_path=lora_name, file_path=lora_path)
 
         if self.loaded_lora is not None:
