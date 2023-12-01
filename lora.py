@@ -6,7 +6,7 @@ import comfy.sd
 import comfy.utils
 import folder_paths
 from diffusers.pipelines.pipeline_utils import DiffusionPipeline
-from s3_utils import download_file
+from .s3_utils import download_file
 
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), "comfy"))
