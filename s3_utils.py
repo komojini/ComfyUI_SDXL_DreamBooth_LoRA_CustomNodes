@@ -9,7 +9,7 @@ import shutil
 import logging
 import threading
 import multiprocessing
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urljoin
 from typing import Optional, Tuple
 
 import boto3
@@ -51,16 +51,16 @@ def get_boto_client(
     '''
     Returns a boto3 client and transfer config for the bucket.
     '''
-    print(os.environ.get('BUCKET_ENDPOINT_URL'))
+    print('BUCKET_ENDPOINT_URL:', os.environ.get('BUCKET_ENDPOINT_URL'))
 
     bucket_session = session.Session()
 
     boto_config = Config(
-        signature_version='s3v4',
-        retries={
-            'max_attempts': 3,
-            'mode': 'standard'
-        }
+        #signature_version='s3v4',
+        #retries={
+        #    'max_attempts': 3,
+        #    'mode': 'standard'
+        #}
     )
 
     transfer_config = TransferConfig(
@@ -100,11 +100,16 @@ def get_boto_client(
 def download_file(bucket_path, file_path):
     boto_client, _ = get_boto_client()
     bucket_name = extract_bucket_name_from_url(os.environ.get('BUCKET_ENDPOINT_URL', None))
-    boto_client.download_file(
+
+    #bucket_path = urljoin(base=os.environ.get('BUCKET_ENDPOINT_URL'), url=bucket_path, allow_fragments=True)
+    
+    print(f"Start downloading file\nbucket_name: {bucket_name}\nbucket_path: {bucket_path}\nfile_path: {file_path}")
+    downloaded_file = boto_client.download_file(
         bucket_name,
         bucket_path,
         file_path
     )
+    print(f"Downloaded file: {downloaded_file}")
 
 # ---------------------------------------------------------------------------- #
 #                                 Upload Image                                 #

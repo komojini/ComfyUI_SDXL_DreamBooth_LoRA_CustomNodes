@@ -1,6 +1,7 @@
 import os
 import sys
 from pathlib import Path
+import shutil
 import torch
 import comfy.sd
 import comfy.utils
@@ -218,10 +219,13 @@ class S3Bucket_Load_LoRA:
         lora = None
         if not lora_path:
             new_lora_path = Path("tmp") / "loras"
-            if not os.path.exists(new_lora_path):
+            if os.path.exists(new_lora_path):
+                shutil.rmtree(new_lora_path, ignore_errors=False, onerror=None)
                 os.makedirs(new_lora_path, exist_ok=True)
             folder_paths.add_model_folder_path("loras", new_lora_path)
             lora_path = new_lora_path / lora_name
+            if not os.path.exists(lora_path):
+                os.makedirs(Path(lora_path).parent)
             download_file(bucket_path=lora_name, file_path=lora_path)
 
         if self.loaded_lora is not None:
@@ -229,6 +233,8 @@ class S3Bucket_Load_LoRA:
                 lora = self.loaded_lora[1]
             else:
                 del self.loaded_lora
+        
+        lora_path = str(lora_path)
         
         if lora is None:
             if lora_path and "checkpoint" in lora_path:
