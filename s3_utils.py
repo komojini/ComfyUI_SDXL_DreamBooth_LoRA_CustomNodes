@@ -51,6 +51,8 @@ def get_boto_client(
     '''
     Returns a boto3 client and transfer config for the bucket.
     '''
+    print(os.environ.get('BUCKET_ENDPOINT_URL'))
+
     bucket_session = session.Session()
 
     boto_config = Config(
