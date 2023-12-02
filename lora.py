@@ -236,7 +236,8 @@ class S3Bucket_Load_LoRA:
         
         lora_path = str(lora_path)
         print(f"Downloaded LoRA path: {lora_path}")
-
+        print(f"Loaded LoRAs: {self.loaded_lora}")
+        
         if lora is None:
             if lora_path and "checkpoint" in lora_path:
                 
