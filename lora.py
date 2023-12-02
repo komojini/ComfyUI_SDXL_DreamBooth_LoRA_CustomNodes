@@ -217,10 +217,11 @@ class S3Bucket_Load_LoRA:
         lora_path = folder_paths.get_full_path("loras", lora_name)
         lora = None
         if not lora_path:
-            new_lora_path = Path("tmp") / "loras"
+            new_lora_path = Path("/tmp") / "loras"
             if os.path.exists(new_lora_path):
                 shutil.rmtree(new_lora_path, ignore_errors=False, onerror=None)
-                os.makedirs(new_lora_path, exist_ok=True)
+            
+            os.makedirs(new_lora_path, exist_ok=True)
             folder_paths.add_model_folder_path("loras", new_lora_path)
             lora_path = new_lora_path / lora_name
             if not os.path.exists(lora_path):
@@ -234,6 +235,7 @@ class S3Bucket_Load_LoRA:
                 del self.loaded_lora
         
         lora_path = str(lora_path)
+        print(f"Downloaded LoRA path: {lora_path}")
 
         if lora is None:
             if lora_path and "checkpoint" in lora_path:
