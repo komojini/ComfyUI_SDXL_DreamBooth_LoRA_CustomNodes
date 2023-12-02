@@ -6,7 +6,6 @@ import torch
 import comfy.sd
 import comfy.utils
 import folder_paths
-from diffusers.pipelines.pipeline_utils import DiffusionPipeline
 from .s3_utils import download_file
 
 
@@ -235,7 +234,7 @@ class S3Bucket_Load_LoRA:
                 del self.loaded_lora
         
         lora_path = str(lora_path)
-        
+
         if lora is None:
             if lora_path and "checkpoint" in lora_path:
                 
