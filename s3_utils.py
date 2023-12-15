@@ -9,9 +9,10 @@ import shutil
 import logging
 import threading
 import multiprocessing
+from pathlib import Path
 from urllib.parse import urlparse, urljoin
 from typing import Optional, Tuple
-
+import requests
 import boto3
 from boto3 import session
 from boto3.s3.transfer import TransferConfig
@@ -89,20 +90,39 @@ def get_boto_client(
 
     return boto_client, transfer_config
 
+def get_file_url(bucket_file_path):
+    url = urljoin(os.getenv("BUCKET_ENDPOINT_URL"), os.getenv("BUCKET_NAME"))
+    url = urljoin(url, bucket_file_path)
+    return url
 
-def download_file(bucket_path, file_path, bucket_creds=None):
+
+def download_file_from_url(url, download_path):
+    response = requests.get(url)
+    
+    with open(download_path, mode="wb") as file:
+        file.write(response.content)
+    print(f"Downloaded file {download_path}")
+    return download_path
+
+def download_file(bucket_file_path, download_path, bucket_creds=None):
+    if not os.getenv("BUCKET_ACCESS_KEY_ID") or not os.getenv("BUCKET_SECRET_ACCESS_KEY"):
+        print("Bucket creds not provided. Try downloading with URL...")
+        lora_url = get_file_url(bucket_file_path)
+        return download_file_from_url(lora_url, download_path)
+    
     boto_client, _ = get_boto_client(bucket_creds=bucket_creds)
     bucket_name = os.getenv("BUCKET_NAME")
 
     #bucket_path = urljoin(base=os.environ.get('BUCKET_ENDPOINT_URL'), url=bucket_path, allow_fragments=True)
     
-    print(f"Start downloading file\nbucket_name: {bucket_name}\nbucket_path: {bucket_path}\nfile_path: {file_path}")
+    print(f"Start downloading file\nbucket_name: {bucket_name}\nbucket_path: {bucket_file_path}\nfile_path: {download_path}")
     downloaded_file = boto_client.download_file(
         bucket_name,
-        bucket_path,
-        file_path
+        bucket_file_path,
+        download_path
     )
     print(f"Downloaded file: {downloaded_file}")
+    return download_path
 
 # ---------------------------------------------------------------------------- #
 #                                 Upload Image                                 #
