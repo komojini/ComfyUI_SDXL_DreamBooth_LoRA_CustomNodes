@@ -192,7 +192,7 @@ class S3Bucket_Load_LoRA:
                 - First value is a `MODEL` object
                 - Secound value is a `CLIP` object
         """
-        for key, value in bucket_creds:
+        for key, value in bucket_creds.items():
             if value:
                 os.environ[key] = value
 
