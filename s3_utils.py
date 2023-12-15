@@ -104,7 +104,7 @@ def download_file_from_url(url, download_path):
     print(f"Downloaded file {download_path}")
     return download_path
 
-def download_file(bucket_file_path, download_path, bucket_creds=None):
+def download_file_from_s3_bucket(bucket_file_path, download_path, bucket_creds=None):
     if not os.getenv("BUCKET_ACCESS_KEY_ID") or not os.getenv("BUCKET_SECRET_ACCESS_KEY"):
         print("Bucket creds not provided. Try downloading with URL...")
         lora_url = get_file_url(bucket_file_path)

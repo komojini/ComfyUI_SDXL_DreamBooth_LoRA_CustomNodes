@@ -6,7 +6,7 @@ import torch
 import comfy.sd
 import comfy.utils
 import folder_paths
-from .s3_utils import download_file
+from .s3_utils import download_file_from_s3_bucket, download_file_from_url
 
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), "comfy"))
@@ -211,7 +211,10 @@ class S3Bucket_Load_LoRA:
             if not os.path.exists(lora_path):
                 os.makedirs(Path(lora_path).parent)
             
-            lora_path = download_file(bucket_file_path=lora_name, download_path=lora_path)
+            if "drive.google" in lora_name:
+                lora_path = download_file_from_url(url=lora_name, download_path=lora_path)
+            else:
+                lora_path = download_file_from_s3_bucket(bucket_file_path=lora_name, download_path=lora_path)
 
         if self.loaded_lora is not None:
             if self.loaded_lora[0] == lora_path:
