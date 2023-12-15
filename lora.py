@@ -224,8 +224,8 @@ class S3Bucket_Load_LoRA:
             local_lora_name = self.get_local_lora_name(remote_lora_path_or_url)
         
             local_lora_path = new_lora_dir / local_lora_name
-            if not os.path.exists(local_lora_path):
-                os.makedirs(Path(local_lora_path).parent)
+            if not os.path.exists(local_lora_path.parent):
+                os.makedirs(local_lora_path.parent, exist_ok=True)
             
             if "drive.google" in lora_url_or_path:
                 local_lora_path = download_file_from_url(url=lora_url_or_path, download_path=local_lora_path)
