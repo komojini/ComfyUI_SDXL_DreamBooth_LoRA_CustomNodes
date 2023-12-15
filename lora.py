@@ -227,9 +227,10 @@ class S3Bucket_Load_LoRA:
             if not os.path.exists(local_lora_path.parent):
                 os.makedirs(local_lora_path.parent, exist_ok=True)
             
+            local_lora_path = str(local_lora_path)
             if "drive.google" in lora_url_or_path:
                 import gdown
-                local_lora_path = gdown.download(lora_url_or_path, local_lora_path, quiet=False)
+                gdown.download(lora_url_or_path, local_lora_path, quiet=False)
             else:
                 local_lora_path = download_file_from_s3_bucket(bucket_file_path=lora_url_or_path, download_path=local_lora_path)
 
