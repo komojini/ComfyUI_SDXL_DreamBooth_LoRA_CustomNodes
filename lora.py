@@ -152,7 +152,7 @@ class S3Bucket_Load_LoRA:
             "required": {
                 "model": ("MODEL",),
                 "clip": ("CLIP",),
-                "lora_name": ("STRING", {
+                "remote_lora_path_or_url": ("STRING", {
                     "multiline": False,
                 }),
                 "strength_model": ("FLOAT", {
@@ -188,7 +188,7 @@ class S3Bucket_Load_LoRA:
             self.lora_name_map[lora_name] = f"{uuid.uuid4()}.safetensors"
         return self.lora_name_map[lora_name]
 
-    def load_lora(self, model, clip, lora_name, strength_model, strength_clip, **bucket_creds):
+    def load_lora(self, model, clip, remote_lora_path_or_url, strength_model, strength_clip, **bucket_creds):
         """
             The entry point method. The name of this method must be the same as the value of property `FUNCTION`.
             For example, if `FUNCTION = "execute"` then this method's name must be `execute`, if `FUNCTION = "foo"` then it must be `foo`.
@@ -206,14 +206,14 @@ class S3Bucket_Load_LoRA:
             if value:
                 os.environ[key] = value
 
-        if lora_name == "None" or not lora_name:
+        if remote_lora_path_or_url == "None" or not remote_lora_path_or_url:
             return model, clip
 
-        local_lora_path = folder_paths.get_full_path("loras", lora_name)
+        local_lora_path = folder_paths.get_full_path("loras", remote_lora_path_or_url)
         lora = None
         if not local_lora_path:
             new_lora_dir = Path("/tmp") / "loras"
-            lora_url_or_path = lora_name
+            lora_url_or_path = remote_lora_path_or_url
             
             if os.path.exists(new_lora_dir):
                 shutil.rmtree(new_lora_dir, ignore_errors=False, onerror=None)
@@ -221,13 +221,12 @@ class S3Bucket_Load_LoRA:
             os.makedirs(new_lora_dir, exist_ok=True)
             folder_paths.add_model_folder_path("loras", new_lora_dir)
             
-            local_lora_name = self.get_local_lora_name(lora_name)
+            local_lora_name = self.get_local_lora_name(remote_lora_path_or_url)
         
             local_lora_path = new_lora_dir / local_lora_name
             if not os.path.exists(local_lora_path):
                 os.makedirs(Path(local_lora_path).parent)
             
-                
             if "drive.google" in lora_url_or_path:
                 local_lora_path = download_file_from_url(url=lora_url_or_path, download_path=local_lora_path)
             else:
