@@ -65,39 +65,14 @@ class XLDB_LoRA:
                 "model": ("MODEL",),
                 "clip": ("CLIP",),
                 "lora_name": (file_list, ),
-                
-            }
-        }
-        return {
-            "required": {
-                "image": ("IMAGE",),
-                "int_field": ("INT", {
-                    "default": 0, 
-                    "min": 0, #Minimum value
-                    "max": 4096, #Maximum value
-                    "step": 64, #Slider's step
-                    "display": "number" # Cosmetic only: display as "number" or "slider"
-                }),
-                "float_field": ("FLOAT", {
-                    "default": 1.0,
-                    "min": 0.0,
-                    "max": 10.0,
-                    "step": 0.01,
-                    "round": 0.001, #The value represeting the precision to round to, will be set to the step value by default. Can be set to False to disable rounding.
-                    "display": "number"}),
-                "print_to_screen": (["enable", "disable"],),
-                "string_field": ("STRING", {
-                    "multiline": False, #True if you want the field to look like the one on the ClipTextEncode node
-                    "default": "Hello World!"
-                }),
             },
         }
-
+        
     RETURN_TYPES = ("MODEL", "CLIP")
     FUNCTION = "load_lora"
 
 
-    def load_lora(self, model, clip, lora_name):
+    def load_lora(self, model, clip, lora_name, **bucket_creds):
         """
             The entry point method. The name of this method must be the same as the value of property `FUNCTION`.
             For example, if `FUNCTION = "execute"` then this method's name must be `execute`, if `FUNCTION = "foo"` then it must be `foo`.
@@ -190,14 +165,20 @@ class S3Bucket_Load_LoRA:
                     "max": 2.0,
                     "step": 0.01,
                 }),    
-            }
+            },
+            "optional": {
+                "BUCKET_ENDPOINT_URL": ("STRING", {"default": ""}),
+                "BUCKET_ACCESS_KEY_ID": ("STRING", {"default": ""}),
+                "BUCKET_SECRET_ACCESS_KEY": ("STRING", {"default": ""}),
+                "BUCKET_NAME": ("STRING", {"default": ""}),
+            },
         }
 
     RETURN_TYPES = ("MODEL", "CLIP")
     FUNCTION = "load_lora"
 
 
-    def load_lora(self, model, clip, lora_name, strength_model, strength_clip):
+    def load_lora(self, model, clip, lora_name, strength_model, strength_clip, **bucket_creds):
         """
             The entry point method. The name of this method must be the same as the value of property `FUNCTION`.
             For example, if `FUNCTION = "execute"` then this method's name must be `execute`, if `FUNCTION = "foo"` then it must be `foo`.
@@ -211,6 +192,9 @@ class S3Bucket_Load_LoRA:
                 - First value is a `MODEL` object
                 - Secound value is a `CLIP` object
         """
+        for key, value in bucket_creds:
+            if value:
+                os.environ[key] = value
 
         if lora_name == "None":
             return model, clip
@@ -232,11 +216,10 @@ class S3Bucket_Load_LoRA:
             if self.loaded_lora[0] == lora_path:
                 lora = self.loaded_lora[1]
             else:
-                del self.loaded_lora
+                self.loaded_lora = None
         
         lora_path = str(lora_path)
         print(f"Downloaded LoRA path: {lora_path}")
-        print(f"Loaded LoRAs: {self.loaded_lora}")
         
         if lora is None:
             if lora_path and "checkpoint" in lora_path:

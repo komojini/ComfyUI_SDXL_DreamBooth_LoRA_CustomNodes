@@ -38,13 +38,6 @@ def extract_region_from_url(endpoint_url):
 
     return None
 
-def extract_bucket_name_from_url(endpoint_url):
-    parsed_url = urlparse(endpoint_url)
-    if '.s3.' in endpoint_url:
-        return endpoint_url.split('.s3.')[0].split('/')[-1]
-    
-    return None
-
 # --------------------------- S3 Bucket Connection --------------------------- #
 def get_boto_client(
         bucket_creds: Optional[dict] = None) -> Tuple[boto3.client, TransferConfig]:  # pragma: no cover # pylint: disable=line-too-long
@@ -97,9 +90,9 @@ def get_boto_client(
     return boto_client, transfer_config
 
 
-def download_file(bucket_path, file_path):
-    boto_client, _ = get_boto_client()
-    bucket_name = extract_bucket_name_from_url(os.environ.get('BUCKET_ENDPOINT_URL', None))
+def download_file(bucket_path, file_path, bucket_creds=None):
+    boto_client, _ = get_boto_client(bucket_creds=bucket_creds)
+    bucket_name = os.getenv("BUCKET_NAME")
 
     #bucket_path = urljoin(base=os.environ.get('BUCKET_ENDPOINT_URL'), url=bucket_path, allow_fragments=True)
     
